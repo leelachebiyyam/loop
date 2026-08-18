@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LOOP — Close your open loops. Watch your energy return.</title>
+  <!-- Google Fonts: Plus Jakarta Sans for UI & Lora for calming readability -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="style.css?v=1.1">
+  <!-- Lucide Icons (Web component/font-free integration) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- Background Ambient Lights -->
+  <div class="ambient-glow bg-glow-1"></div>
+  <div class="ambient-glow bg-glow-2"></div>
+  <div class="ambient-glow bg-glow-3"></div>
+
+  <div class="app-container" id="main-app-container">
+    
+    <!-- 1. WELCOME SCREEN -->
+    <section id="welcome-screen" class="view active">
+      <div class="welcome-content">
+        <div class="logo-container" data-design-el="logo">
+          <div class="logo-ring"></div>
+          <h1 class="logo-text">LOOP</h1>
+        </div>
+        
+        <blockquote class="philosophy-quote" data-design-el="philosophy-quote">
+          "the real reason you're tired all the time: it's not your workload. it's your open loops. The text you haven't answered. The apology you owe. The decision you're avoiding. The conversation you keep postponing. These run on the background of your mind all day, draining your battery. Close your loops. Watch your energy return. Mental clutter is more exhausting than physical work ever will be."
+        </blockquote>
+        
+        <button id="btn-clear-loops" class="btn primary-btn btn-pulse" data-design-el="btn-clear-loops">
+          Clear your loops
+          <i data-lucide="arrow-right"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- 2. PATH SCREEN -->
+    <section id="path-screen" class="view">
+      <div class="path-content">
+        <h2 class="section-title" data-design-el="path-title">How would you like to start?</h2>
+        <p class="section-subtitle" data-design-el="path-subtitle">Choose a path to begin restoring your mental energy.</p>
+        
+        <div class="path-options" data-design-el="path-options">
+          <button id="path-guided" class="path-card">
+            <div class="path-icon-container">
+              <i data-lucide="compass" class="path-icon"></i>
+            </div>
+            <h3>I want to be guided to my loops</h3>
+            <p>We'll ask you a few targeted questions to help you uncover the hidden thoughts draining your mind.</p>
+            <div class="path-badge">Recommended</div>
+          </button>
+          
+          <button id="path-direct" class="path-card">
+            <div class="path-icon-container">
+              <i data-lucide="edit-3" class="path-icon"></i>
+            </div>
+            <h3>I know what the loops are</h3>
+            <p>Jump straight into writing them down, attaching notes, and categorizing them directly.</p>
+          </button>
+        </div>
+
+        <button class="btn text-btn btn-back-welcome" data-design-el="path-back-btn">
+          <i data-lucide="chevron-left"></i> Back
+        </button>
+      </div>
+    </section>
+
+    <!-- 3. GUIDED QUESTIONNAIRE SCREEN -->
+    <section id="guided-screen" class="view">
+      <div class="guided-header" data-design-el="guided-header">
+        <div class="mini-logo clickable-logo">LOOP</div>
+        <div class="progress-bar-container">
+          <div id="guided-progress" class="progress-bar" style="width: 20%;"></div>
+        </div>
+        <div id="guided-step-counter" class="step-counter">Step 1 of 5</div>
+      </div>
+
+      <div class="guided-question-container">
+        <div class="question-card" data-design-el="guided-card">
+          <div class="question-icon">
+            <i id="q-icon" data-lucide="message-square"></i>
+          </div>
+          <h2 id="q-title" class="question-text">Is there a message, email, or text you've been putting off replying to?</h2>
+          <p id="q-hint" class="question-hint">Even a 2-minute reply can hang in your head for days. Write it down to get it out.</p>
+          
+          <div class="guided-input-group">
+            <textarea id="guided-textarea" placeholder="Type your open loop here..."></textarea>
+            <div class="guided-actions">
+              <button id="btn-guided-skip" class="btn secondary-btn">Skip</button>
+              <button id="btn-guided-next" class="btn primary-btn">
+                <span>Capture & Next</span>
+                <i data-lucide="arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. CARD WRITER SCREEN -->
+    <section id="writer-screen" class="view">
+      <header class="screen-header" data-design-el="writer-header">
+        <div class="mini-logo clickable-logo">LOOP</div>
+        <button id="btn-go-all-loops" class="btn secondary-btn header-action">
+          <i data-lucide="layout-grid"></i>
+          <span>All Loops</span>
+        </button>
+      </header>
+
+      <div class="card-slider-container">
+        <!-- The active card is dynamically manipulated or rendered. We keep structure for static fallback and clone it -->
+        <div class="loop-card-wrapper" id="card-wrapper" data-design-el="writer-card">
+          <div class="loop-card" id="active-card">
+            <div class="card-header">
+              <span class="card-tag">NEW OPEN LOOP</span>
+              <div class="card-header-controls">
+                <div class="control-select-wrapper">
+                  <label for="card-priority">Priority:</label>
+                  <select id="card-priority" class="priority-select">
+                    <option value="urgent">🔴 Urgent</option>
+                    <option value="high" selected>🟠 High</option>
+                    <option value="medium">🔵 Medium</option>
+                    <option value="low">🟢 Low</option>
+                  </select>
+                </div>
+                <div class="control-select-wrapper">
+                  <label for="card-deadline">Due:</label>
+                  <input type="date" id="card-deadline" class="deadline-input">
+                </div>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <textarea id="card-note-text" placeholder="What is the open loop? (e.g., The decision on renewing the gym membership, apologizing to Alex...)"></textarea>
+              
+              <!-- Dynamic Attachment Previews -->
+              <div id="attachment-previews" class="attachment-previews">
+                <!-- Audio, image, or video preview items will append here -->
+              </div>
+            </div>
+
+            <div class="card-footer">
+              <div class="media-toolbar">
+                <button class="toolbar-btn" id="btn-emoji" title="Add Emoji">
+                  <i data-lucide="smile"></i>
+                </button>
+                <button class="toolbar-btn" id="btn-attach-image" title="Attach Image">
+                  <i data-lucide="image"></i>
+                  <input type="file" id="input-image" accept="image/*" style="display:none">
+                </button>
+                <button class="toolbar-btn" id="btn-attach-video" title="Attach Video">
+                  <i data-lucide="video"></i>
+                  <input type="file" id="input-video" accept="video/*" style="display:none">
+                </button>
+                <button class="toolbar-btn" id="btn-record-audio" title="Record Audio Note">
+                  <i data-lucide="mic" id="mic-icon"></i>
+                  <span class="rec-dot" style="display:none"></span>
+                </button>
+              </div>
+
+              <button id="btn-send-card" class="send-btn" title="Save Loop">
+                <i data-lucide="arrow-right"></i>
+              </button>
+            </div>
+
+            <!-- Custom Emoji Picker Panel -->
+            <div id="emoji-picker" class="emoji-picker hidden">
+              <div class="emoji-picker-header">
+                <span>Select Emoji</span>
+                <button class="close-picker-btn" id="btn-close-emoji">&times;</button>
+              </div>
+              <div class="emoji-list">
+                <!-- JS will populate standard emojis -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Audio Recording Overlay -->
+      <div id="audio-recording-panel" class="audio-panel hidden">
+        <div class="audio-panel-content">
+          <div class="recording-visualizer">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+          </div>
+          <span id="recording-timer">00:00</span>
+          <div class="audio-panel-actions">
+            <button id="btn-audio-cancel" class="btn icon-btn danger-text"><i data-lucide="trash-2"></i></button>
+            <button id="btn-audio-stop" class="btn primary-btn"><i data-lucide="square"></i> Stop & Attach</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. ALL LOOPS SCREEN -->
+    <section id="all-loops-screen" class="view">
+      <header class="screen-header" data-design-el="all-loops-header">
+        <div class="mini-logo clickable-logo">LOOP</div>
+        <div class="header-stats">
+          <span class="stat-badge"><strong id="open-loops-count">0</strong> open</span>
+          <button id="btn-show-archive" class="stat-badge completed-badge clickable-badge" title="View Closed Loops Archive">
+            <strong id="closed-loops-count">0</strong> closed
+          </button>
+        </div>
+      </header>
+
+      <main class="all-loops-content">
+        <div class="all-loops-intro" data-design-el="all-loops-intro">
+          <h2 class="section-title">Your Open Loops</h2>
+          <p class="section-subtitle">Closing loops releases cognitive energy. Focus on one at a time.</p>
+        </div>
+
+        <!-- Column Grid based on Priorities -->
+        <div class="priority-columns" data-design-el="all-loops-columns">
+          <!-- URGENT COLUMN -->
+          <div class="priority-column urgent-col">
+            <div class="column-header">
+              <span class="indicator red-dot"></span>
+              <h3>Urgent</h3>
+              <span class="col-count" id="count-urgent">0</span>
+            </div>
+            <div class="column-cards" id="cards-urgent">
+              <!-- Cards dynamic -->
+            </div>
+          </div>
+
+          <!-- HIGH COLUMN -->
+          <div class="priority-column high-col">
+            <div class="column-header">
+              <span class="indicator orange-dot"></span>
+              <h3>High</h3>
+              <span class="col-count" id="count-high">0</span>
+            </div>
+            <div class="column-cards" id="cards-high">
+              <!-- Cards dynamic -->
+            </div>
+          </div>
+
+          <!-- MEDIUM COLUMN -->
+          <div class="priority-column medium-col">
+            <div class="column-header">
+              <span class="indicator blue-dot"></span>
+              <h3>Medium</h3>
+              <span class="col-count" id="count-medium">0</span>
+            </div>
+            <div class="column-cards" id="cards-medium">
+              <!-- Cards dynamic -->
+            </div>
+          </div>
+
+          <!-- LOW COLUMN -->
+          <div class="priority-column low-col">
+            <div class="column-header">
+              <span class="indicator green-dot"></span>
+              <h3>Low</h3>
+              <span class="col-count" id="count-low">0</span>
+            </div>
+            <div class="column-cards" id="cards-low">
+              <!-- Cards dynamic -->
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Bottom Floating Navigation Bar -->
+      <footer class="loops-footer-nav" data-design-el="all-loops-footer">
+        <div class="footer-nav-container">
+          <button id="btn-nav-write" class="nav-item-btn" title="Add Loop">
+            <i data-lucide="plus"></i>
+            <span>Add Loop</span>
+          </button>
+          
+          <button id="btn-nav-anxiety" class="nav-item-btn" title="Check Anxiety">
+            <i data-lucide="brain"></i>
+            <span>Check Anxiety</span>
+          </button>
+        </div>
+      </footer>
+    </section>
+
+    <!-- 6. CHECK ANXIETY SCREEN -->
+    <section id="anxiety-screen" class="view">
+      <header class="screen-header" data-design-el="anxiety-header">
+        <div class="mini-logo clickable-logo">LOOP</div>
+        <button class="btn secondary-btn btn-back-loops">
+          <i data-lucide="chevron-left"></i>
+          <span>All Loops</span>
+        </button>
+      </header>
+
+      <div class="anxiety-content" data-design-el="anxiety-content">
+        <div id="anxiety-setup" class="anxiety-view-state">
+          <div class="anxiety-intro-card">
+            <div class="anxiety-icon-header">
+              <i data-lucide="activity"></i>
+            </div>
+            <h2>Mental Energy Assessment</h2>
+            <p>Not all open loops weigh the same. Some drain your battery silently, creating anxiety in the background. We'll run a quick pairwise comparison of your active loops to rank which ones are costing you the most mental peace.</p>
+            <button id="btn-start-anxiety" class="btn primary-btn btn-pulse">Start Evaluation</button>
+          </div>
+        </div>
+
+        <div id="anxiety-empty" class="anxiety-view-state hidden">
+          <div class="anxiety-intro-card">
+            <div class="anxiety-icon-header">
+              <i data-lucide="sparkles"></i>
+            </div>
+            <h2>All Loops Closed</h2>
+            <p>You have no active open loops to evaluate. Create some loops or enjoy your complete peace of mind!</p>
+            <button id="btn-anxiety-go-write" class="btn primary-btn">Add a Loop</button>
+          </div>
+        </div>
+
+        <div id="anxiety-comparison" class="anxiety-view-state hidden">
+          <div class="comparison-header">
+            <h3>Which open loop is costing you more mental energy?</h3>
+            <p class="comparison-hint">Select the card that feels heavier or makes you more anxious thinking about it.</p>
+            <div class="comparison-progress">
+              <div class="comp-progress-bar-bg">
+                <div id="comp-progress-fill" class="comp-progress-bar-fill" style="width: 0%;"></div>
+              </div>
+              <span id="comp-progress-text">Match 1 of 10</span>
+            </div>
+          </div>
+
+          <div class="comparison-cards-container">
+            <button class="comparison-card" id="comp-card-a">
+              <span class="comp-card-badge">Option A</span>
+              <p class="comp-card-text" id="comp-card-a-text">Loop text A</p>
+              <div class="comp-card-media" id="comp-card-a-media"></div>
+            </button>
+
+            <div class="comparison-vs">VS</div>
+
+            <button class="comparison-card" id="comp-card-b">
+              <span class="comp-card-badge">Option B</span>
+              <p class="comp-card-text" id="comp-card-b-text">Loop text B</p>
+              <div class="comp-card-media" id="comp-card-b-media"></div>
+            </button>
+          </div>
+          
+          <button id="btn-skip-comparison" class="btn text-btn">Skip comparison / Neutral</button>
+        </div>
+
+        <div id="anxiety-results" class="anxiety-view-state hidden">
+          <div class="results-card">
+            <div class="results-header">
+              <i data-lucide="trophy" class="results-icon animate-bounce"></i>
+              <h2>Your Anxiety & Mental Energy Map</h2>
+              <p>Based on your selections, here is the order in which your open loops are draining your mental battery. Close the top ones first for the biggest release of tension.</p>
+            </div>
+            
+            <div class="anxiety-ranking-list" id="anxiety-ranking-list">
+              <!-- Ranked list of loops dynamic -->
+            </div>
+
+            <div class="results-actions">
+              <button class="btn secondary-btn btn-back-loops">
+                <i data-lucide="layout-grid"></i> All Loops
+              </button>
+              <button id="btn-re-evaluate" class="btn primary-btn">
+                <i data-lucide="refresh-cw"></i> Re-Evaluate
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- FLOATING DESIGN BUILDER INTERFACE -->
+  <div class="design-trigger-container">
+    <button id="btn-toggle-design" class="design-toggle-btn" title="Toggle Layout Builder">
+      <i data-lucide="brush"></i>
+      <span>Layout Builder</span>
+    </button>
+  </div>
+
+  <div id="design-panel" class="design-panel hidden">
+    <div class="design-panel-header">
+      <div class="design-panel-title">
+        <i data-lucide="sliders"></i>
+        <span>Layout Designer</span>
+      </div>
+      <button id="btn-close-design-panel" class="close-panel-btn">&times;</button>
+    </div>
+    <div class="design-panel-body">
+      <p class="design-panel-desc">Drag elements to move. Drag the handles (⬊) to resize. Double-click text to edit content directly.</p>
+      
+      <div class="design-control-group">
+        <label>Visual Workspace Mode:</label>
+        <div class="design-toggle-group">
+          <button id="btn-mode-standard" class="design-mode-tab active">Single Page</button>
+          <button id="btn-mode-artboard" class="design-mode-tab">All Screens (Artboard)</button>
+        </div>
+      </div>
+
+      <div class="design-control-group">
+        <button id="btn-reset-layout" class="btn secondary-btn btn-full">
+          <i data-lucide="rotate-ccw"></i> Reset Layout & Text
+        </button>
+      </div>
+
+      <div class="design-control-group">
+        <label>Active Layout Styles (CSS Output):</label>
+        <p class="design-panel-desc">Copy this CSS to save edits permanently in code.</p>
+        <textarea id="design-css-output" readonly placeholder="Reposition or resize elements to generate custom layouts..."></textarea>
+        <button id="btn-copy-css" class="btn primary-btn btn-full mt-2">
+          <i data-lucide="copy"></i> Copy CSS Code
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLOSED LOOPS ARCHIVE MODAL -->
+  <div id="archive-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i data-lucide="archive"></i>
+          <span>Closed Loops Archive</span>
+        </div>
+        <button id="btn-close-archive" class="close-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">Review your completed loops. Reopening a loop will return it to your active board.</p>
+        <div id="archive-list-container" class="archive-list">
+          <!-- Dynamic closed loops will render here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOOP DETAILS & JOURNEY MODAL -->
+  <div id="details-modal" class="modal-overlay hidden">
+    <div class="modal-card details-modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i data-lucide="git-commit"></i>
+          <span>Loop Journey & Details</span>
+        </div>
+        <button id="btn-close-details" class="close-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body scrollable-modal-body">
+        
+        <!-- Loop core text -->
+        <div class="details-section">
+          <label class="details-label">Loop Description</label>
+          <textarea id="details-loop-text" class="details-textarea" placeholder="Describe this open loop..."></textarea>
+        </div>
+
+        <!-- Loop priority and deadline -->
+        <div class="details-row">
+          <div class="details-col">
+            <label for="details-priority" class="details-label">Priority</label>
+            <select id="details-priority" class="priority-select w-full">
+              <option value="urgent">🔴 Urgent</option>
+              <option value="high">🟠 High</option>
+              <option value="medium">🔵 Medium</option>
+              <option value="low">🟢 Low</option>
+            </select>
+          </div>
+          <div class="details-col">
+            <label for="details-deadline" class="details-label">Deadline / Remind Me Date</label>
+            <input type="date" id="details-deadline" class="deadline-input w-full">
+          </div>
+        </div>
+
+        <!-- Journey timeline -->
+        <div class="details-section">
+          <label class="details-label">Journey & Progress Log</label>
+          <div id="details-timeline-list" class="timeline-list">
+            <!-- Milestones timeline will render here -->
+          </div>
+        </div>
+
+        <!-- Add milestone input -->
+        <div class="details-section add-milestone-section">
+          <label class="details-label">Add Progress Update / Next Step</label>
+          <div class="milestone-input-group">
+            <textarea id="input-milestone-text" placeholder="Type next step or progress (e.g., Sent email, advisor says she will reply on Aug 10)"></textarea>
+            <button id="btn-add-milestone" class="btn primary-btn mt-2">
+              <i data-lucide="plus-circle"></i> Add Update
+            </button>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="details-actions-row">
+          <button id="btn-details-delete" class="btn text-btn danger-text">
+            <i data-lucide="trash-2"></i> Delete Loop
+          </button>
+          <div class="details-right-actions">
+            <button id="btn-details-complete" class="btn secondary-btn">
+              <i data-lucide="check-circle-2"></i> Close Loop
+            </button>
+            <button id="btn-details-save" class="btn primary-btn">
+              <i data-lucide="save"></i> Save Changes
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- QUICK NOTE SCRATCHPAD MODAL -->
+  <div id="quick-note-modal" class="modal-overlay hidden">
+    <div class="modal-card quick-note-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i data-lucide="notebook"></i>
+          <span>Quick Note</span>
+        </div>
+        <button id="btn-close-quick-note" class="close-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="quick-note-meta">
+          <span class="details-label">Loop Reference:</span>
+          <p id="quick-note-loop-ref" class="loop-ref-text"></p>
+        </div>
+        <textarea id="quick-note-textarea" class="quick-note-editor" placeholder="Jot down quick thoughts, links, updates, draft emails... (Auto-saves in real-time)"></textarea>
+        <div class="quick-note-footer">
+          <span id="quick-note-save-status" class="save-status">
+            <i data-lucide="check-check"></i> Auto-saved to memory
+          </span>
+          <button id="btn-save-quick-note" class="btn primary-btn">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS Code -->
+  <script src="app.js?v=1.1"></script>
+</body>
+</html>
