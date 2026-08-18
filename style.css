@@ -238,19 +238,13 @@ body {
   box-shadow: 0 4px 20px rgba(var(--accent-primary-rgb), 0.25);
 }
 
-.primary-btn:hover:not([data-design-el]) {
-  transform: translateY(-2px);
+.primary-btn:hover {
   box-shadow: 0 8px 25px rgba(var(--accent-primary-rgb), 0.4);
+  filter: brightness(1.15); /* Clean, translation-safe hover effect */
 }
 
-.primary-btn:hover[data-design-el],
-.secondary-btn:hover[data-design-el] {
-  box-shadow: 0 8px 25px rgba(var(--accent-primary-rgb), 0.4);
-  filter: brightness(1.15); /* Calmer highlight that won't overwrite custom transform positions */
-}
-
-.primary-btn:active:not([data-design-el]) {
-  transform: translateY(0);
+.primary-btn:active {
+  filter: brightness(0.95);
 }
 
 .secondary-btn {
@@ -260,10 +254,14 @@ body {
   backdrop-filter: blur(10px);
 }
 
-.secondary-btn:hover:not([data-design-el]) {
+.secondary-btn:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.15);
-  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+.secondary-btn:active {
+  filter: brightness(0.9);
 }
 
 .text-btn {
