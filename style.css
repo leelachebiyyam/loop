@@ -238,12 +238,18 @@ body {
   box-shadow: 0 4px 20px rgba(var(--accent-primary-rgb), 0.25);
 }
 
-.primary-btn:hover {
+.primary-btn:hover:not([data-design-el]) {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(var(--accent-primary-rgb), 0.4);
 }
 
-.primary-btn:active {
+.primary-btn:hover[data-design-el],
+.secondary-btn:hover[data-design-el] {
+  box-shadow: 0 8px 25px rgba(var(--accent-primary-rgb), 0.4);
+  filter: brightness(1.15); /* Calmer highlight that won't overwrite custom transform positions */
+}
+
+.primary-btn:active:not([data-design-el]) {
   transform: translateY(0);
 }
 
@@ -254,7 +260,7 @@ body {
   backdrop-filter: blur(10px);
 }
 
-.secondary-btn:hover {
+.secondary-btn:hover:not([data-design-el]) {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.15);
   transform: translateY(-1px);
