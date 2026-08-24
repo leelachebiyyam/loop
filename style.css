@@ -33,7 +33,9 @@ body.scope-professional {
   --accent-primary-rgb: 130, 177, 198;
   --accent-secondary: 145, 30%, 65%; /* Sage Green */
   --accent-secondary-rgb: 134, 194, 157;
-  
+}
+
+:root {
   /* Text Colors (Muted off-whites to prevent stark screen glare) */
   --text-main: 210, 20%, 92%;
   --text-muted: 214, 12%, 70%;
