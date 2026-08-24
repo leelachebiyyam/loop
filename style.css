@@ -14,10 +14,25 @@
   --color-low: 145, 45%, 55%;     /* Soft Sage Green - biological reassurance */
   
   /* Brand Accents (Soothing nature-inspired pastels) */
-  --accent-primary: 145, 30%, 65%;   /* Calm Sage Green (#86c29d) */
+  --accent-primary: 145, 30%, 65%;   /* Default Calm Sage Green */
   --accent-primary-rgb: 134, 194, 157;
-  --accent-secondary: 198, 30%, 65%; /* Soft Ocean Mist Blue (#81afc6) */
+  --accent-secondary: 198, 30%, 65%; /* Default Soft Ocean Mist Blue */
   --accent-secondary-rgb: 130, 177, 198;
+}
+
+/* Scope-Specific Color Variations */
+body.scope-personal {
+  --accent-primary: 145, 30%, 65%;   /* Sage Green */
+  --accent-primary-rgb: 134, 194, 157;
+  --accent-secondary: 198, 30%, 65%; /* Ocean Blue */
+  --accent-secondary-rgb: 130, 177, 198;
+}
+
+body.scope-professional {
+  --accent-primary: 198, 30%, 65%;   /* Ocean Blue */
+  --accent-primary-rgb: 130, 177, 198;
+  --accent-secondary: 145, 30%, 65%; /* Sage Green */
+  --accent-secondary-rgb: 134, 194, 157;
   
   /* Text Colors (Muted off-whites to prevent stark screen glare) */
   --text-main: 210, 20%, 92%;
@@ -2366,3 +2381,74 @@ body {
   width: 14px;
   height: 14px;
 }
+
+/* Scope Selector Toggles in Header */
+.scope-selector {
+  display: flex;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-glass);
+  border-radius: 30px;
+  padding: 0.25rem;
+  gap: 0.25rem;
+}
+
+.scope-btn {
+  background: transparent;
+  border: none;
+  color: hsl(var(--text-muted));
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.45rem 1.1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all var(--transition-fast);
+}
+
+.scope-btn:hover:not(.active) {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.scope-btn.active {
+  background: hsl(var(--accent-primary));
+  color: #0f171e !important;
+  box-shadow: 0 4px 12px rgba(var(--accent-primary-rgb), 0.25);
+}
+
+.scope-btn i {
+  width: 14px;
+  height: 14px;
+  transition: transform var(--transition-fast);
+}
+
+.scope-btn.active i {
+  transform: scale(1.1);
+}
+
+/* Card Writer and Details Scope Selectors */
+.scope-select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-glass);
+  border-radius: 10px;
+  padding: 0.3rem 0.5rem;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.8rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.scope-select:focus {
+  border-color: var(--border-focus);
+}
+
+.details-col .scope-select {
+  padding: 0.55rem 0.75rem;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.25);
+}
+

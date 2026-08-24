@@ -34,6 +34,7 @@ const GUIDED_QUESTIONS = [
 let guidedIndex = 0;
 let activeDetailsLoopId = null;
 let activeQuickNoteLoopId = null;
+let activeScope = 'personal';
 
 // Card Writer State
 let cardAttachments = [];
@@ -60,6 +61,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load loops from LocalStorage
   loadLoops();
 
+  // Initialize Workspace Scope
+  activeScope = localStorage.getItem('loop_active_scope') || 'personal';
+  document.body.className = 'scope-' + activeScope;
+
   // Initialize Lucide Icons
   lucide.createIcons();
 
@@ -70,6 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
   setupAllLoopsDashboard();
   setupAnxietyChecker();
   setupModals(); // Setup new timeline & archive modals
+  setupScopeSelector();
+  updateScopeTogglesUI();
   
   // Initialize Visual Layout Builder
   initDesignMode();
@@ -225,7 +232,8 @@ function setupGuidedTour() {
         elo: 1000, // Base Elo for anxiety checker
         deadline: '',
         milestones: [],
-        quickNote: ''
+        quickNote: '',
+        scope: 'personal'
       };
       loops.push(newLoop);
       saveLoops();
@@ -333,6 +341,7 @@ function setupCardWriter() {
 
     // 1. Create loop item object
     const deadlineVal = document.getElementById('card-deadline').value || '';
+    const scopeVal = document.getElementById('card-scope').value || 'personal';
     const newLoop = {
       id: 'loop_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
       text: textVal,
@@ -343,7 +352,8 @@ function setupCardWriter() {
       elo: 1000,
       deadline: deadlineVal,
       milestones: [],
-      quickNote: ''
+      quickNote: '',
+      scope: scopeVal
     };
 
     // 2. Add to local state and save
@@ -359,6 +369,7 @@ function setupCardWriter() {
       textarea.value = '';
       prioritySelect.value = 'high';
       document.getElementById('card-deadline').value = '';
+      document.getElementById('card-scope').value = activeScope;
       cardAttachments = [];
       renderAttachmentsPreviews();
 
@@ -535,8 +546,8 @@ function renderDashboard() {
     document.getElementById(`count-${p}`).innerText = '0';
   });
 
-  const openLoops = loops.filter(l => l.status === 'open');
-  const closedLoops = loops.filter(l => l.status === 'closed');
+  const openLoops = loops.filter(l => l.status === 'open' && (l.scope || 'personal') === activeScope);
+  const closedLoops = loops.filter(l => l.status === 'closed' && (l.scope || 'personal') === activeScope);
 
   // Stats
   document.getElementById('open-loops-count').innerText = openLoops.length;
@@ -756,7 +767,7 @@ function setupAnxietyChecker() {
 
 function initAnxietyView() {
   // Show intro or empty state
-  const activeLoops = loops.filter(l => l.status === 'open');
+  const activeLoops = loops.filter(l => l.status === 'open' && (l.scope || 'personal') === activeScope);
   
   if (activeLoops.length === 0) {
     showAnxietyState('anxiety-empty');
@@ -778,7 +789,7 @@ function showAnxietyState(stateId) {
 }
 
 function startAnxietyEvaluation() {
-  activeAnxietyLoops = loops.filter(l => l.status === 'open');
+  activeAnxietyLoops = loops.filter(l => l.status === 'open' && (l.scope || 'personal') === activeScope);
   if (activeAnxietyLoops.length === 0) {
     showAnxietyState('anxiety-empty');
     return;
@@ -1425,6 +1436,7 @@ function setupModals() {
     if (loop) {
       loop.text = document.getElementById('details-loop-text').value.trim();
       loop.priority = document.getElementById('details-priority').value;
+      loop.scope = document.getElementById('details-scope').value;
       loop.deadline = document.getElementById('details-deadline').value || '';
       saveLoops();
       detailsModal.classList.add('hidden');
@@ -1461,6 +1473,7 @@ function openDetailsModal(loopId) {
   // Set field values
   document.getElementById('details-loop-text').value = loop.text;
   document.getElementById('details-priority').value = loop.priority;
+  document.getElementById('details-scope').value = loop.scope || 'personal';
   document.getElementById('details-deadline').value = loop.deadline || '';
   document.getElementById('input-milestone-text').value = '';
 
@@ -1522,7 +1535,7 @@ function renderArchiveList() {
   const container = document.getElementById('archive-list-container');
   container.innerHTML = '';
 
-  const closedLoops = loops.filter(l => l.status === 'closed');
+  const closedLoops = loops.filter(l => l.status === 'closed' && (l.scope || 'personal') === activeScope);
 
   if (closedLoops.length === 0) {
     container.innerHTML = `<div class="archive-empty">No closed loops in your archive yet. Go close some active loops!</div>`;
@@ -1610,3 +1623,38 @@ function openQuickNoteModal(loopId) {
   lucide.createIcons();
 }
 
+function setupScopeSelector() {
+  document.querySelectorAll('.scope-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const btnEl = e.currentTarget;
+      const newScope = btnEl.getAttribute('data-scope');
+      switchScope(newScope);
+    });
+  });
+}
+
+function updateScopeTogglesUI() {
+  document.querySelectorAll('.scope-btn').forEach(btn => {
+    if (btn.getAttribute('data-scope') === activeScope) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+  // Also sync the card scope input in Card Creator
+  const cardScopeInput = document.getElementById('card-scope');
+  if (cardScopeInput) {
+    cardScopeInput.value = activeScope;
+  }
+}
+
+function switchScope(newScope) {
+  activeScope = newScope;
+  localStorage.setItem('loop_active_scope', activeScope);
+  document.body.className = 'scope-' + activeScope;
+  updateScopeTogglesUI();
+  renderDashboard();
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+}

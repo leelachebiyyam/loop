@@ -131,6 +131,13 @@
                   </select>
                 </div>
                 <div class="control-select-wrapper">
+                  <label for="card-scope">Space:</label>
+                  <select id="card-scope" class="scope-select">
+                    <option value="personal" selected>👤 Personal</option>
+                    <option value="professional">💼 Professional</option>
+                  </select>
+                </div>
+                <div class="control-select-wrapper">
                   <label for="card-deadline">Due:</label>
                   <input type="date" id="card-deadline" class="deadline-input">
                 </div>
@@ -207,6 +214,19 @@
     <section id="all-loops-screen" class="view">
       <header class="screen-header" data-design-el="all-loops-header">
         <div class="mini-logo clickable-logo">LOOP</div>
+        
+        <!-- Workspace Mode / Scope Selector -->
+        <div class="scope-selector">
+          <button class="scope-btn active" data-scope="personal">
+            <i data-lucide="user"></i>
+            <span>Personal</span>
+          </button>
+          <button class="scope-btn" data-scope="professional">
+            <i data-lucide="briefcase"></i>
+            <span>Professional</span>
+          </button>
+        </div>
+
         <div class="header-stats">
           <span class="stat-badge"><strong id="open-loops-count">0</strong> open</span>
           <button id="btn-show-archive" class="stat-badge completed-badge clickable-badge" title="View Closed Loops Archive">
@@ -460,7 +480,7 @@
           <textarea id="details-loop-text" class="details-textarea" placeholder="Describe this open loop..."></textarea>
         </div>
 
-        <!-- Loop priority and deadline -->
+        <!-- Loop priority, scope, and deadline -->
         <div class="details-row">
           <div class="details-col">
             <label for="details-priority" class="details-label">Priority</label>
@@ -472,7 +492,14 @@
             </select>
           </div>
           <div class="details-col">
-            <label for="details-deadline" class="details-label">Deadline / Remind Me Date</label>
+            <label for="details-scope" class="details-label">Workspace Space</label>
+            <select id="details-scope" class="scope-select w-full">
+              <option value="personal">👤 Personal</option>
+              <option value="professional">💼 Professional</option>
+            </select>
+          </div>
+          <div class="details-col">
+            <label for="details-deadline" class="details-label">Deadline / Remind Date</label>
             <input type="date" id="details-deadline" class="deadline-input w-full">
           </div>
         </div>
