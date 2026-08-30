@@ -35,6 +35,9 @@ let guidedIndex = 0;
 let activeDetailsLoopId = null;
 let activeQuickNoteLoopId = null;
 let activeScope = 'personal';
+let folders = [];
+let activeFolderId = 'all';
+const STORAGE_FOLDERS_KEY = 'loop_app_folders';
 
 // Card Writer State
 let cardAttachments = [];
@@ -60,6 +63,7 @@ const EMOJIS = [
 document.addEventListener('DOMContentLoaded', () => {
   // Load loops from LocalStorage
   loadLoops();
+  loadFolders();
 
   // Initialize Workspace Scope
   activeScope = localStorage.getItem('loop_active_scope') || 'personal';
@@ -77,6 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
   setupModals(); // Setup new timeline & archive modals
   setupScopeSelector();
   updateScopeTogglesUI();
+  setupFoldersSidebar();
+  renderFoldersSidebar();
   
   // Initialize Visual Layout Builder
   initDesignMode();
@@ -97,9 +103,30 @@ function loadLoops() {
   }
 }
 
+function loadFolders() {
+  const data = localStorage.getItem(STORAGE_FOLDERS_KEY);
+  if (data) {
+    try {
+      folders = JSON.parse(data);
+    } catch (e) {
+      console.error("Error loading folders", e);
+      folders = [];
+    }
+  } else {
+    folders = [];
+  }
+}
+
+function saveFolders() {
+  localStorage.setItem(STORAGE_FOLDERS_KEY, JSON.stringify(folders));
+  renderFoldersSidebar();
+  populateFolderSelects();
+}
+
 function saveLoops() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(loops));
   renderDashboard();
+  renderFoldersSidebar();
 }
 
 // NAVIGATION SYSTEM (SPA ROUTING)
@@ -342,6 +369,7 @@ function setupCardWriter() {
     // 1. Create loop item object
     const deadlineVal = document.getElementById('card-deadline').value || '';
     const scopeVal = document.getElementById('card-scope').value || 'personal';
+    const folderVal = document.getElementById('card-folder').value || 'none';
     const newLoop = {
       id: 'loop_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
       text: textVal,
@@ -353,7 +381,8 @@ function setupCardWriter() {
       deadline: deadlineVal,
       milestones: [],
       quickNote: '',
-      scope: scopeVal
+      scope: scopeVal,
+      folderId: folderVal === 'none' ? undefined : folderVal
     };
 
     // 2. Add to local state and save
@@ -370,6 +399,7 @@ function setupCardWriter() {
       prioritySelect.value = 'high';
       document.getElementById('card-deadline').value = '';
       document.getElementById('card-scope').value = activeScope;
+      document.getElementById('card-folder').value = activeFolderId === 'all' || activeFolderId === 'uncategorized' ? 'none' : activeFolderId;
       cardAttachments = [];
       renderAttachmentsPreviews();
 
@@ -546,12 +576,20 @@ function renderDashboard() {
     document.getElementById(`count-${p}`).innerText = '0';
   });
 
-  const openLoops = loops.filter(l => l.status === 'open' && (l.scope || 'personal') === activeScope);
-  const closedLoops = loops.filter(l => l.status === 'closed' && (l.scope || 'personal') === activeScope);
+  const openLoopsInSpace = loops.filter(l => l.status === 'open' && (l.scope || 'personal') === activeScope);
+  const closedLoopsInSpace = loops.filter(l => l.status === 'closed' && (l.scope || 'personal') === activeScope);
 
-  // Stats
-  document.getElementById('open-loops-count').innerText = openLoops.length;
-  document.getElementById('closed-loops-count').innerText = closedLoops.length;
+  // Further filter open loops for the board columns based on selected folder
+  let openLoops = openLoopsInSpace;
+  if (activeFolderId === 'uncategorized') {
+    openLoops = openLoopsInSpace.filter(l => !l.folderId || l.folderId === 'none');
+  } else if (activeFolderId !== 'all') {
+    openLoops = openLoopsInSpace.filter(l => l.folderId === activeFolderId);
+  }
+
+  // Stats (Total count in the active space)
+  document.getElementById('open-loops-count').innerText = openLoopsInSpace.length;
+  document.getElementById('closed-loops-count').innerText = closedLoopsInSpace.length;
 
   const priorityCounts = { urgent: 0, high: 0, medium: 0, low: 0 };
 
@@ -767,7 +805,12 @@ function setupAnxietyChecker() {
 
 function initAnxietyView() {
   // Show intro or empty state
-  const activeLoops = loops.filter(l => l.status === 'open' && (l.scope || 'personal') === activeScope);
+  let activeLoops = loops.filter(l => l.status === 'open' && (l.scope || 'personal') === activeScope);
+  if (activeFolderId === 'uncategorized') {
+    activeLoops = activeLoops.filter(l => !l.folderId || l.folderId === 'none');
+  } else if (activeFolderId !== 'all') {
+    activeLoops = activeLoops.filter(l => l.folderId === activeFolderId);
+  }
   
   if (activeLoops.length === 0) {
     showAnxietyState('anxiety-empty');
@@ -789,7 +832,14 @@ function showAnxietyState(stateId) {
 }
 
 function startAnxietyEvaluation() {
-  activeAnxietyLoops = loops.filter(l => l.status === 'open' && (l.scope || 'personal') === activeScope);
+  const activeAnxietyLoopsInSpace = loops.filter(l => l.status === 'open' && (l.scope || 'personal') === activeScope);
+  activeAnxietyLoops = activeAnxietyLoopsInSpace;
+  if (activeFolderId === 'uncategorized') {
+    activeAnxietyLoops = activeAnxietyLoopsInSpace.filter(l => !l.folderId || l.folderId === 'none');
+  } else if (activeFolderId !== 'all') {
+    activeAnxietyLoops = activeAnxietyLoopsInSpace.filter(l => l.folderId === activeFolderId);
+  }
+  
   if (activeAnxietyLoops.length === 0) {
     showAnxietyState('anxiety-empty');
     return;
@@ -1437,6 +1487,8 @@ function setupModals() {
       loop.text = document.getElementById('details-loop-text').value.trim();
       loop.priority = document.getElementById('details-priority').value;
       loop.scope = document.getElementById('details-scope').value;
+      const folderVal = document.getElementById('details-folder').value;
+      loop.folderId = folderVal === 'none' ? undefined : folderVal;
       loop.deadline = document.getElementById('details-deadline').value || '';
       saveLoops();
       detailsModal.classList.add('hidden');
@@ -1474,6 +1526,7 @@ function openDetailsModal(loopId) {
   document.getElementById('details-loop-text').value = loop.text;
   document.getElementById('details-priority').value = loop.priority;
   document.getElementById('details-scope').value = loop.scope || 'personal';
+  document.getElementById('details-folder').value = loop.folderId || 'none';
   document.getElementById('details-deadline').value = loop.deadline || '';
   document.getElementById('input-milestone-text').value = '';
 
@@ -1652,9 +1705,209 @@ function switchScope(newScope) {
   activeScope = newScope;
   localStorage.setItem('loop_active_scope', activeScope);
   document.body.className = 'scope-' + activeScope;
+  activeFolderId = 'all'; // Default to show all loops in the new space
   updateScopeTogglesUI();
+  renderFoldersSidebar();
+  populateFolderSelects();
   renderDashboard();
   if (window.lucide) {
     lucide.createIcons();
+  }
+}
+
+function setupFoldersSidebar() {
+  // New folder button
+  const btnAddFolder = document.getElementById('btn-add-folder');
+  if (btnAddFolder) {
+    btnAddFolder.addEventListener('click', () => {
+      const name = prompt("Enter new folder name:");
+      if (name && name.trim()) {
+        const folderName = name.trim();
+        // Check duplicates
+        const exists = folders.some(f => f.scope === activeScope && f.name.toLowerCase() === folderName.toLowerCase());
+        if (exists) {
+          alert("A folder with this name already exists in this space.");
+          return;
+        }
+
+        const newFolder = {
+          id: 'folder_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+          name: folderName,
+          scope: activeScope,
+          createdAt: new Date().toISOString()
+        };
+
+        folders.push(newFolder);
+        saveFolders();
+        switchFolder(newFolder.id);
+      }
+    });
+  }
+
+  // Event listener delegation for sidebar items click
+  const sidebar = document.getElementById('sidebar-folders');
+  if (sidebar) {
+    sidebar.addEventListener('click', (e) => {
+      const folderBtn = e.target.closest('.folder-item');
+      if (!folderBtn) return;
+      
+      // Skip if clicking edit/delete action button
+      if (e.target.closest('.folder-action-btn')) return;
+
+      const folderId = folderBtn.getAttribute('data-folder-id');
+      switchFolder(folderId);
+    });
+  }
+}
+
+function renderFoldersSidebar() {
+  const container = document.getElementById('custom-folders-list');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const activeOpenLoops = loops.filter(l => l.status === 'open' && (l.scope || 'personal') === activeScope);
+  
+  // Count static folders
+  const countAll = activeOpenLoops.length;
+  const countUncategorized = activeOpenLoops.filter(l => !l.folderId || l.folderId === 'none').length;
+
+  document.getElementById('folder-count-all').innerText = countAll;
+  document.getElementById('folder-count-uncategorized').innerText = countUncategorized;
+
+  // Filter custom folders in current scope
+  const activeFolders = folders.filter(f => f.scope === activeScope);
+
+  // Render custom list
+  activeFolders.forEach(f => {
+    const folderLoopsCount = activeOpenLoops.filter(l => l.folderId === f.id).length;
+    
+    const btn = document.createElement('button');
+    btn.className = `folder-item ${activeFolderId === f.id ? 'active' : ''}`;
+    btn.setAttribute('data-folder-id', f.id);
+    btn.innerHTML = `
+      <i data-lucide="folder"></i>
+      <span class="folder-name">${escapeHTML(f.name)}</span>
+      <span class="folder-badge">${folderLoopsCount}</span>
+      <div class="folder-actions-row">
+        <button class="folder-action-btn btn-rename-folder" title="Rename Folder"><i data-lucide="edit-2"></i></button>
+        <button class="folder-action-btn btn-delete-folder" title="Delete Folder"><i data-lucide="trash-2"></i></button>
+      </div>
+    `;
+
+    // Rename action
+    btn.querySelector('.btn-rename-folder').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const newName = prompt("Rename folder to:", f.name);
+      if (newName && newName.trim() && newName.trim() !== f.name) {
+        const folderName = newName.trim();
+        // Check duplicates
+        const exists = folders.some(fol => fol.scope === activeScope && fol.id !== f.id && fol.name.toLowerCase() === folderName.toLowerCase());
+        if (exists) {
+          alert("A folder with this name already exists.");
+          return;
+        }
+        f.name = folderName;
+        saveFolders();
+        if (activeFolderId === f.id) {
+          switchFolder(f.id);
+        }
+      }
+    });
+
+    // Delete action
+    btn.querySelector('.btn-delete-folder').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (confirm(`Are you sure you want to delete the folder "${f.name}"? Tasks inside it will not be deleted, they will simply be moved to Uncategorized.`)) {
+        // Move loops inside it to uncategorized
+        loops.forEach(l => {
+          if (l.folderId === f.id) {
+            delete l.folderId;
+          }
+        });
+        
+        // Remove folder
+        folders = folders.filter(fol => fol.id !== f.id);
+        
+        // Save states
+        saveFolders();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(loops)); // Save loops but don't call saveLoops to avoid loop cycle
+
+        if (activeFolderId === f.id) {
+          switchFolder('all');
+        } else {
+          renderDashboard();
+        }
+      }
+    });
+
+    container.appendChild(btn);
+  });
+
+  populateFolderSelects();
+
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+}
+
+function switchFolder(folderId) {
+  activeFolderId = folderId;
+
+  // Update active state in UI
+  document.querySelectorAll('.folder-item').forEach(btn => {
+    if (btn.getAttribute('data-folder-id') === folderId) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+
+  // Update Title text on board
+  const titleEl = document.getElementById('current-folder-title');
+  if (titleEl) {
+    if (folderId === 'all') {
+      titleEl.innerText = "Your Open Loops";
+    } else if (folderId === 'uncategorized') {
+      titleEl.innerText = "Uncategorized Loops";
+    } else {
+      const folder = folders.find(f => f.id === folderId);
+      titleEl.innerText = folder ? `${folder.name} Loops` : "Your Open Loops";
+    }
+  }
+
+  // Sync selectors value to match active folder (if it is a custom folder)
+  const defaultFolderSelect = activeFolderId === 'all' || activeFolderId === 'uncategorized' ? 'none' : activeFolderId;
+  const cardFolder = document.getElementById('card-folder');
+  if (cardFolder) cardFolder.value = defaultFolderSelect;
+
+  renderDashboard();
+}
+
+function populateFolderSelects() {
+  const cardFolderSelect = document.getElementById('card-folder');
+  const detailsFolderSelect = document.getElementById('details-folder');
+  
+  const activeFolders = folders.filter(f => f.scope === activeScope);
+
+  const populate = (selectEl) => {
+    if (!selectEl) return;
+    const currentVal = selectEl.value;
+    selectEl.innerHTML = '<option value="none">📁 No Folder</option>';
+    activeFolders.forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = f.id;
+      opt.innerText = `📁 ${f.name}`;
+      selectEl.appendChild(opt);
+    });
+    // Restore value if it still exists
+    selectEl.value = currentVal;
+  };
+
+  populate(cardFolderSelect);
+  populate(detailsFolderSelect);
+
+  // Sync default selection in Card Creator to match active sidebar folder
+  if (cardFolderSelect) {
+    cardFolderSelect.value = activeFolderId === 'all' || activeFolderId === 'uncategorized' ? 'none' : activeFolderId;
   }
 }

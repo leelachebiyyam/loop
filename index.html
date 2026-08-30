@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <!-- CSS Stylesheet -->
-  <link rel="stylesheet" href="style.css?v=1.4">
+  <link rel="stylesheet" href="style.css?v=1.5">
   <!-- Lucide Icons (Web component/font-free integration) -->
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -138,6 +138,12 @@
                   </select>
                 </div>
                 <div class="control-select-wrapper">
+                  <label for="card-folder">Folder:</label>
+                  <select id="card-folder" class="scope-select">
+                    <option value="none">📁 No Folder</option>
+                  </select>
+                </div>
+                <div class="control-select-wrapper">
                   <label for="card-deadline">Due:</label>
                   <input type="date" id="card-deadline" class="deadline-input">
                 </div>
@@ -236,58 +242,90 @@
       </header>
 
       <main class="all-loops-content">
-        <div class="all-loops-intro" data-design-el="all-loops-intro">
-          <h2 class="section-title">Your Open Loops</h2>
-          <p class="section-subtitle">Closing loops releases cognitive energy. Focus on one at a time.</p>
-        </div>
+        <div class="dashboard-layout">
+          <!-- Left Sidebar: Folders List -->
+          <aside class="sidebar-folders" id="sidebar-folders">
+            <div class="sidebar-section-header">
+              <span>SPACES & FOLDERS</span>
+            </div>
+            <div class="folder-list-items">
+              <button class="folder-item active" data-folder-id="all">
+                <i data-lucide="layout-grid"></i>
+                <span class="folder-name">All Loops</span>
+                <span class="folder-badge" id="folder-count-all">0</span>
+              </button>
+              <button class="folder-item" data-folder-id="uncategorized">
+                <i data-lucide="inbox"></i>
+                <span class="folder-name">Uncategorized</span>
+                <span class="folder-badge" id="folder-count-uncategorized">0</span>
+              </button>
+              <div class="custom-folders-divider"></div>
+              <div id="custom-folders-list">
+                <!-- Custom folders render here -->
+              </div>
+            </div>
+            <button id="btn-add-folder" class="btn text-btn add-folder-btn">
+              <i data-lucide="plus-circle"></i>
+              <span>New Folder</span>
+            </button>
+          </aside>
 
-        <!-- Column Grid based on Priorities -->
-        <div class="priority-columns" data-design-el="all-loops-columns">
-          <!-- URGENT COLUMN -->
-          <div class="priority-column urgent-col">
-            <div class="column-header">
-              <span class="indicator red-dot"></span>
-              <h3>Urgent</h3>
-              <span class="col-count" id="count-urgent">0</span>
+          <!-- Right Content: Open Board Columns -->
+          <div class="main-dashboard-content">
+            <div class="all-loops-intro" data-design-el="all-loops-intro">
+              <h2 class="section-title" id="current-folder-title">Your Open Loops</h2>
+              <p class="section-subtitle">Closing loops releases cognitive energy. Focus on one at a time.</p>
             </div>
-            <div class="column-cards" id="cards-urgent">
-              <!-- Cards dynamic -->
-            </div>
-          </div>
 
-          <!-- HIGH COLUMN -->
-          <div class="priority-column high-col">
-            <div class="column-header">
-              <span class="indicator orange-dot"></span>
-              <h3>High</h3>
-              <span class="col-count" id="count-high">0</span>
-            </div>
-            <div class="column-cards" id="cards-high">
-              <!-- Cards dynamic -->
-            </div>
-          </div>
+            <!-- Column Grid based on Priorities -->
+            <div class="priority-columns" data-design-el="all-loops-columns">
+              <!-- URGENT COLUMN -->
+              <div class="priority-column urgent-col">
+                <div class="column-header">
+                  <span class="indicator red-dot"></span>
+                  <h3>Urgent</h3>
+                  <span class="col-count" id="count-urgent">0</span>
+                </div>
+                <div class="column-cards" id="cards-urgent">
+                  <!-- Cards dynamic -->
+                </div>
+              </div>
 
-          <!-- MEDIUM COLUMN -->
-          <div class="priority-column medium-col">
-            <div class="column-header">
-              <span class="indicator blue-dot"></span>
-              <h3>Medium</h3>
-              <span class="col-count" id="count-medium">0</span>
-            </div>
-            <div class="column-cards" id="cards-medium">
-              <!-- Cards dynamic -->
-            </div>
-          </div>
+              <!-- HIGH COLUMN -->
+              <div class="priority-column high-col">
+                <div class="column-header">
+                  <span class="indicator orange-dot"></span>
+                  <h3>High</h3>
+                  <span class="col-count" id="count-high">0</span>
+                </div>
+                <div class="column-cards" id="cards-high">
+                  <!-- Cards dynamic -->
+                </div>
+              </div>
 
-          <!-- LOW COLUMN -->
-          <div class="priority-column low-col">
-            <div class="column-header">
-              <span class="indicator green-dot"></span>
-              <h3>Low</h3>
-              <span class="col-count" id="count-low">0</span>
-            </div>
-            <div class="column-cards" id="cards-low">
-              <!-- Cards dynamic -->
+              <!-- MEDIUM COLUMN -->
+              <div class="priority-column medium-col">
+                <div class="column-header">
+                  <span class="indicator blue-dot"></span>
+                  <h3>Medium</h3>
+                  <span class="col-count" id="count-medium">0</span>
+                </div>
+                <div class="column-cards" id="cards-medium">
+                  <!-- Cards dynamic -->
+                </div>
+              </div>
+
+              <!-- LOW COLUMN -->
+              <div class="priority-column low-col">
+                <div class="column-header">
+                  <span class="indicator green-dot"></span>
+                  <h3>Low</h3>
+                  <span class="col-count" id="count-low">0</span>
+                </div>
+                <div class="column-cards" id="cards-low">
+                  <!-- Cards dynamic -->
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -480,7 +518,7 @@
           <textarea id="details-loop-text" class="details-textarea" placeholder="Describe this open loop..."></textarea>
         </div>
 
-        <!-- Loop priority, scope, and deadline -->
+        <!-- Loop priority, scope, folder, and deadline -->
         <div class="details-row">
           <div class="details-col">
             <label for="details-priority" class="details-label">Priority</label>
@@ -496,6 +534,12 @@
             <select id="details-scope" class="scope-select w-full">
               <option value="personal">👤 Personal</option>
               <option value="professional">💼 Professional</option>
+            </select>
+          </div>
+          <div class="details-col">
+            <label for="details-folder" class="details-label">Folder</label>
+            <select id="details-folder" class="scope-select w-full">
+              <option value="none">📁 No Folder</option>
             </select>
           </div>
           <div class="details-col">
@@ -569,6 +613,6 @@
   </div>
 
   <!-- JS Code -->
-  <script src="app.js?v=1.4"></script>
+  <script src="app.js?v=1.5"></script>
 </body>
 </html>
