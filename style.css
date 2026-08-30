@@ -935,7 +935,7 @@ body {
 
 /* 5. ALL LOOPS SCREEN */
 #all-loops-screen {
-  max-width: 1200px;
+  max-width: 1400px;
   padding-bottom: 7rem; /* Room for bottom nav */
 }
 
@@ -962,26 +962,37 @@ body {
 }
 
 .priority-columns {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
   gap: 1.5rem;
   margin-top: 2rem;
   align-items: start;
+  overflow-x: auto;
+  padding-bottom: 1.5rem;
+  width: 100%;
 }
 
-@media (max-width: 1024px) {
-  .priority-columns {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.priority-columns::-webkit-scrollbar {
+  height: 6px;
 }
 
-@media (max-width: 600px) {
-  .priority-columns {
-    grid-template-columns: 1fr;
-  }
+.priority-columns::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 3px;
+}
+
+.priority-columns::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+}
+
+.priority-columns::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .priority-column {
+  flex: 1;
+  min-width: 260px;
+  flex-shrink: 0;
   background: rgba(255, 255, 255, 0.015);
   border: 1px solid var(--border-glass);
   border-radius: 20px;
@@ -2630,6 +2641,17 @@ body {
   }
   .folder-name {
     max-width: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .priority-columns {
+    flex-direction: column;
+    overflow-x: visible;
+  }
+  .priority-column {
+    width: 100%;
+    min-width: 0;
   }
 }
 
